@@ -15,9 +15,9 @@ _ALL_ALGS = [*_INCOMPLETE_ALGS, *_COMPLETE_ALGS]
 
 # FILEPATHS WHERE TO SEARCH FOR LOGS
 # (use * for 'any folder')
-folder = "noneg"
-ontology_folder = "lubm-0"
-input_folder = "*"
+folder = "logs" #e.g. logs, ., ...
+ontology_folder = "lubm-0" #e.g. *, lubm-0, family, ...
+input_folder = "*" # e.g. *_noneg, lubm-0_1*, lubm-0_5*_neg, ...
 
 # TIMES FOR WHICH THE AVERAGES WILL BE MEASURED
 max_time = 7200 # maximal time to be shown in th graph
@@ -54,12 +54,12 @@ def main():
             counts = np.searchsorted(df['time'].values, time_bins, side='right')
 
             # Store as DataFrame
-            helper_df = pd.DataFrame({'time_bin': time_bins, 'count': counts})
+            helper_df = pd.DataFrame({'time': time_bins, 'count': counts})
             helper_tables.append(helper_df)
 
         if helper_tables:
             merged = pd.concat(helper_tables)
-            avg_result = merged.groupby('time_bin')['count'].mean().reset_index()
+            avg_result = merged.groupby('time')['count'].mean().reset_index()
             all_results[alg] = avg_result['count'].values  # save just the values
 
         else:
@@ -67,18 +67,18 @@ def main():
             all_results[alg] = [np.nan] * len(time_bins)
 
     # Combine into one big DataFrame
-    final_df = pd.DataFrame({'time_bin': time_bins})
+    final_df = pd.DataFrame({'time': time_bins})
 
     for alg in _COMPLETE_ALGS:
         final_df[alg] = all_results[alg]
 
     # Export to single CSV
     final_df.to_csv(
-        f"avg_expl_times_{sanitize_filename(folder)}_{sanitize_filename(ontology_folder)}_{sanitize_filename(input_folder)}.csv",
+        f"results/avg_expl_times_{sanitize_filename(input_folder)}.csv",
         sep=';', index=False
     )
 
 if __name__ == '__main__':
     for i in range(5):
-        input_folder = f"lubm-0_{i+1}*"
+        input_folder = f"lubm-0_{i+1}*_noneg"
         main()
