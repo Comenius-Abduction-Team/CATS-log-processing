@@ -52,29 +52,22 @@ def set_algs(alg_list : Sequence[str]):
 def avg_exps_over_time():
 
     def get_final_time(file_path):
-        final_path = file_path.replace("_explanation_times", "_final")
+        final_path = file_path.replace("_explanation-times", "_final")
 
         if not os.path.isfile(final_path):
             print(f"⚠️ Final file not found: {final_path}")
             return None
 
         with open(final_path, 'r') as f:
-            lines = f.readlines()
-            if not lines:
-                return None
-
-            last_line = lines[-1].strip()
-            match = re.search(r'Time:\s*([0-9.]+)', last_line)
-            if match:
-                return float(match.group(1))
-            else:
-                last_line = lines[-2].strip()
-                match = re.search(r'Time:\s*([0-9.]+)', last_line)
+            for line in reversed(f.readlines()):  # prechádzame súbor odzadu
+                line = line.strip()
+                match = re.search(r'Time:\s*([0-9.]+)', line)
                 if match:
                     return float(match.group(1))
-                else:
-                    print(f"⚠️ Time pattern not found in final file: {final_path}")
-                    return None
+
+        print(f"⚠️ Time pattern not found in final file: {final_path}")
+        return None
+
 
     all_results = {}
 
@@ -83,9 +76,9 @@ def avg_exps_over_time():
         print(f"ALGORITHM: {alg}")
 
         if config.ignore_default_path_structure:
-            regex = f"{config.logs_dir}/{alg}/{config.filename}explanation_times.log"
+            regex = f"{config.logs_dir}/{alg}/{config.filename}_explanation-times.log"
         else:
-            regex = f"{config.logs_dir}/{alg}/{config.ontology_dir}/{config.input_dir}/{config.filename}explanation_times.log"
+            regex = f"{config.logs_dir}/{alg}/{config.ontology_dir}/{config.input_dir}/{config.filename}_explanation-times.log"
         files = glob.glob(regex)
 
         if not files:
@@ -161,7 +154,7 @@ def avg_time_by_size(negations : bool=None, mode : Mode=Mode.ALL):
             files = glob.glob(
                 f"{config.logs_dir}/{alg}/{config.ontology_dir}/" +
                 f"{generate_lubm_input_folder_string(negations=negations, level=size)}" +
-                f"/{config.filename}explanation_times.log")
+                f"/{config.filename}explanation-times.log")
 
             if not files:
                 continue
@@ -223,7 +216,7 @@ def count_by_size(negations : bool=None, average : bool=False):
             files = glob.glob(
                 f"{config.logs_dir}/{alg}/{config.ontology_dir}/" +
                 f"{generate_lubm_input_folder_string(negations=negations, level=size)}" +
-                "/*explanation_times.log")
+                "/*explanation-times.log")
 
             if not files:
                 continue
@@ -266,7 +259,7 @@ def scatter_expl_time_by_size(negations : bool=None, mode : Mode=Mode.ALL):
             files = glob.glob(
                 f"{config.logs_dir}/{alg}/{config.ontology_dir}/" +
                 f"{generate_lubm_input_folder_string(negations=negations, level=size)}" +
-                "/*explanation_times.log")
+                "/*explanation-times.log")
 
             if not files:
                 continue

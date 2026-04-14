@@ -27,6 +27,18 @@ def set_export_image_settings(width : Optional[float]=None, height : Optional[fl
         'export_height': height
     })
 
+def set_limits_plt(xlim=None, ylim=None):
+    if xlim is not None:
+        plt.xlim(*xlim)
+    if ylim is not None:
+        plt.ylim(*ylim)
+
+def set_limits_ax(ax, xlim=None, ylim=None):
+    if xlim is not None:
+        ax.set_xlim(*xlim)
+    if ylim is not None:
+        ax.set_ylim(*ylim)
+
 def add_export_image_extension(extension : str):
     config.export_extensions.append(extension)
 
@@ -81,8 +93,6 @@ def get_end_values(df):
     newDf = {}
     # Detect when each column reaches its final value
     for col in df.columns[1:]:  # skip 'time'
-        if str(col) == 'MHS':
-            print()
         final_val = df[col].iloc[-1]
         changes = (df[col] != final_val) & (~df[col].isna())
         last_non_final_index = changes[changes].index.max()
@@ -96,6 +106,14 @@ def get_end_values(df):
 
     return newDf
 
+def clip_df_by_xlim(df: pd.DataFrame, x_col: str, xlim):
+    if xlim is None:
+        return df
+
+    xmin, xmax = xlim
+    return df[(df[x_col] >= xmin) & (df[x_col] <= xmax)]
+
+
 def scatter_line_graphs(x_axis_name : str, y_axis_name : str, discrete : bool, regex : str='/*.csv'):
     for file in glob.glob(f"{config.data_dir}{regex}"):
         scatter_line_graph(file, x_axis_name, y_axis_name, discrete)
@@ -105,8 +123,8 @@ def plot_line_graphs(x_axis_name : str, discrete : bool, regex : str='/*.csv'):
         plot_line_graph(file, x_axis_name, discrete)
 
 
-def plot_line_graph(file: str, x_axis_name: str, discrete: bool, logarithmic: bool = False, miny: float = -0.1,
-                    maxy: float = 15000, limity: bool = False):
+def plot_line_graph(file: str, x_axis_name: str, discrete: bool, logarithmic: bool = False,
+                    xlim: Optional[Tuple[float, float]] = None, ylim: Optional[Tuple[float, float]] = None):
     file = config.data_dir + '/' + file
 
     print(f"Ploting file: {file}")
@@ -115,16 +133,27 @@ def plot_line_graph(file: str, x_axis_name: str, discrete: bool, logarithmic: bo
 
     # Load your result table
     df = pd.read_csv(file, sep=';')
-    df = trim_line_graph(df)
+    #df = trim_line_graph(df)
     end_values = get_end_values(df)
-    x = df[x_axis_name]
 
-    if limity:
-        plt.set_ylim(miny, maxy)
+    df = clip_df_by_xlim(df, x_axis_name, xlim) #new
+    x = df[x_axis_name]
+    #TODO orezat dataframe aby to bolo po urcite cislo a nie cely csv timeout (pridat ako dalsi nepovinny argument)
+
+    #if limity:
+        #plt.set_ylim(miny, maxy)
+    #set_axis_limits(plt, xlim=xlim, ylim=ylim)
+    set_limits_plt(xlim=xlim, ylim=ylim)
+
+
     if logarithmic:
         plt.set_yscale('symlog')
 
-    max_x, min_x = max(x), min(x)
+
+    if xlim is not None:
+        min_x, max_x = xlim
+    else:
+        min_x, max_x = min(x), max(x)
 
     tick_freq = 0
 
@@ -179,8 +208,24 @@ def plot_line_graph(file: str, x_axis_name: str, discrete: bool, logarithmic: bo
     plt.close()
 
 
-def plot_line_graphs_grid(x_axis_name: str, discrete: bool, cols: int, rows: int, regex: str = '/*.csv', logarithmic : bool=False, miny : float=-0.1, maxy : float=15000, limity : bool=False, legend_cols : int=3):
+def plot_line_graphs_grid(x_axis_name: str, discrete: bool, cols: int, rows: int, regex: str = '/*.csv', logarithmic : bool=False,
+                          xlim: Optional[Tuple[float, float]] = None,
+                          ylim: Optional[Tuple[float, float]] = None,
+                          legend_cols : int=3,
+                          rect: Tuple[float, float, float, float] = (0, 0.02, 1, 0.80),
+                          order: Optional[List[str]] = None):
+
     files = glob.glob(f"{config.data_dir}{regex}")
+
+    if order is not None:
+        def sort_key(f):
+            name = generic.extract_filename_from_filepath(f)
+            try:
+                return order.index(name)
+            except ValueError:
+                return len(order)  # čo nie je v zozname ide na koniec
+
+        files = sorted(files, key=sort_key)
 
     fig, axes = plt.subplots(rows, cols, figsize=(cols * config.export_width, rows * config.export_height),
                              sharex=False, sharey=False)
@@ -202,16 +247,24 @@ def plot_line_graphs_grid(x_axis_name: str, discrete: bool, cols: int, rows: int
     for i, file in enumerate(files):
         ax = axes[i]
         df = pd.read_csv(file, sep=';')
-        df = trim_line_graph(df)
+        #df = trim_line_graph(df)
         end_values = get_end_values(df)
+
+        df = clip_df_by_xlim(df, x_axis_name, xlim) #new
         x = df[x_axis_name]
 
-        if limity:
-            ax.set_ylim(miny, maxy)
+        #if limity:
+            #ax.set_ylim(miny, maxy)
+        #set_axis_limits(plt, xlim=xlim, ylim=ylim)
+        set_limits_ax(ax, xlim=xlim, ylim=ylim)
+
         if logarithmic:
             ax.set_yscale('symlog')
 
-        max_x, min_x = max(x), min(x)
+        if xlim is not None:
+            min_x, max_x = xlim
+        else:
+            min_x, max_x = min(x), max(x)
 
         tick_freq = 0
 
@@ -283,8 +336,6 @@ def plot_line_graphs_grid(x_axis_name: str, discrete: bool, cols: int, rows: int
     #bbox_to_anchor=(0.5, -0.05)
 
 
-    rect=(0, 0.02, 1, 0.80)
-    #rect=(0, 0.05, 1, 0.950)
     fig.tight_layout(rect=rect)  # Leave space for legend & title
 
     # Save single figure

@@ -102,9 +102,9 @@ class Config:
         self.x_label = ''
         self.y_label = ''
         self.title = ''
-        self.export_width = 9
-        self.export_height = 7
-        self.export_extensions = {'png', 'pdf'}
+        self.export_width = 6
+        self.export_height = 9
+        self.export_extensions = {'png'}
 
     def update(self, updated_values : dict[str,Any] ):
         for variable, value in updated_values.items():
