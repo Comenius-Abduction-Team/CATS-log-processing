@@ -18,7 +18,7 @@ Contains the project configuration.
 
 This file defines the available algorithms, default paths, and plotting settings such as colours, markers, and figure size.
 
-### `process_logs.py` TODO
+### `process_logs.py`
 Processes raw log files produced by the CATS solver.
 
 It reads the logs produced by CATS, extracts relevant statistics, computes averages and aggregated metrics, and exports the processed data into CSV files.
