@@ -10,20 +10,25 @@ The framework allows users to:
 ## Project structure
 ### `main.py`
 The main script of the project.
+
 It is used to configure which logs should be processed, select the algorithms, set input and output directories, run the log processing, and generate graphs.
 
 ### `config.py`
 Contains the project configuration.
+
 This file defines the available algorithms, default paths, and plotting settings such as colours, markers, and figure size.
 
 ### `process_logs.py` TODO
 Processes raw log files produced by the CATS solver.
+
 It reads the logs produced by CATS, extracts relevant statistics, computes averages and aggregated metrics, and exports the processed data into CSV files.
 
 ### `plot_logs.py`
 Creates graphs from the processed CSV files.
+
 It reads the exported CSV files and generates line plots and grid figures that can be saved as PNG or PDF.
 
 ### `generic_funcs.py`
 Contains helper functions used throughout the project.
+
 These functions handle common tasks such as creating directories and working with file names.
