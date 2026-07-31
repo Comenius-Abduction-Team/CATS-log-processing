@@ -193,14 +193,14 @@ def plot_line_graph(file: str, x_axis_name: str, discrete: bool, logarithmic: bo
     # Add labels and grid
     plt.xlabel(config.x_label)
     plt.ylabel(config.y_label)
-    plt.title(f"{config.title}: {generic.extract_filename_from_filepath(file)}")
+    plt.title(f"{config.title}: {generic.extract_filename_without_extension_from_filepath(file)}")
     plt.legend(loc='upper center', ncol=3, bbox_to_anchor=(0.5, -0.1))
     # plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1),)
     plt.grid(True, alpha=0.25)
     plt.tight_layout()
 
     # Show the plot
-    save_figure(generic.extract_filename_from_filepath(file))
+    save_figure(generic.extract_filename_without_extension_from_filepath(file))
     # show_figure()
 
     print("Figure saved!")
@@ -219,7 +219,7 @@ def plot_line_graphs_grid(x_axis_name: str, discrete: bool, cols: int, rows: int
 
     if order is not None:
         def sort_key(f):
-            name = generic.extract_filename_from_filepath(f)
+            name = generic.extract_filename_without_extension_from_filepath(f)
             try:
                 return order.index(name)
             except ValueError:
@@ -320,7 +320,7 @@ def plot_line_graphs_grid(x_axis_name: str, discrete: bool, cols: int, rows: int
                 except KeyError:
                     continue
 
-        ax.set_title(generic.extract_filename_from_filepath(file), fontname="Cambria")
+        ax.set_title(generic.extract_filename_without_extension_from_filepath(file), fontname="Cambria")
         ax.grid(True)
 
     # Hide unused subplots if any
@@ -376,12 +376,12 @@ def scatter_line_graph(file : str, x_axis_name : str, y_axis_name : str, discret
     # Add labels and grid
     plt.xlabel(config.x_label)
     plt.ylabel(config.y_label)
-    plt.title(f"{config.title}: {generic.extract_filename_from_filepath(file)}")
+    plt.title(f"{config.title}: {generic.extract_filename_without_extension_from_filepath(file)}")
     plt.legend(loc='upper center', bbox_to_anchor=(0.5, -0.1), ncol=5)
     plt.grid(True)
 
     # Show the plot
-    save_figure(generic.extract_filename_from_filepath(file))
+    save_figure(generic.extract_filename_without_extension_from_filepath(file))
     #show_figure()
 
     print("Figure saved!")

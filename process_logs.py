@@ -13,10 +13,11 @@ from generic_funcs import generate_lubm_input_folder_string
 
 config = cfg.config
 
+# WHICH EXPLANATION DISCOVERY TIMES SHOULD BE CONSIDERED
 class Mode(Enum):
-    ALL = 0
-    FIRST = 1
-    LAST = 2
+    ALL_EXPLANATIONS = 0  # every explanation discovery time
+    FIRST_EXPLANATION = 1 # only the first discovered explanation time
+    LAST_EXPLANATION = 2  # only the last discovered explanation time
 
 
 # TIMES FOR WHICH THE AVERAGES WILL BE MEASURED
@@ -91,7 +92,7 @@ def avg_exps_over_time():
         for file in files:
             print(f"Processing file: {file}")
 
-            df = pd.read_csv(file, sep=';', names=['time', 'explanation'])
+            df = pd.read_csv(file, sep=';', names=['time', 'length', 'explanation'])
             df = df.sort_values('time')  # should already be sorted but safe
 
             log_max_time = get_final_time(file)
@@ -137,7 +138,7 @@ def avg_exps_over_time():
     # Export to single CSV
     export_data(final_df)
 
-def avg_time_by_size(negations : bool=None, mode : Mode=Mode.ALL):
+def avg_time_by_size(negations : bool=None, mode : Mode=Mode.ALL_EXPLANATIONS):
 
     final_df = pd.DataFrame({'size': size_bins})
 
@@ -163,9 +164,10 @@ def avg_time_by_size(negations : bool=None, mode : Mode=Mode.ALL):
 
                 print(f"Processing file: {file}")
 
-                df = pd.read_csv(file, sep=';', names=['time', 'explanation'])
+                df = pd.read_csv(file, sep=';', names=['time', 'length', 'explanation'])
+                df = df.sort_values('time')
 
-                if mode == Mode.ALL:
+                if mode == Mode.ALL_EXPLANATIONS:
                     for time in df['time']:
                         rows.append({'size': size, 'time': time})
 
@@ -173,9 +175,9 @@ def avg_time_by_size(negations : bool=None, mode : Mode=Mode.ALL):
 
                    if not df.empty:
                         time = None
-                        if mode == Mode.FIRST:
+                        if mode == Mode.FIRST_EXPLANATION:
                             time=df.iloc[0]['time']
-                        elif mode == Mode.LAST:
+                        elif mode == Mode.LAST_EXPLANATION:
                             time=df.iloc[-1]['time']
                         rows.append({'size':size, 'time':time})
 
@@ -226,7 +228,7 @@ def count_by_size(negations : bool=None, average : bool=False):
                 print(f"Processing file: {file}")
 
                 with open(file) as f:
-                    row_count = sum(1 for _ in f) - 1
+                    row_count = sum(1 for line in f if line.strip()) #row_count = sum(1 for _ in f) - 1 TODO check
                 total_count += row_count
 
                 if average:
@@ -242,7 +244,7 @@ def count_by_size(negations : bool=None, average : bool=False):
     # Export to single CSV
     export_data(final_df)
 
-def scatter_expl_time_by_size(negations : bool=None, mode : Mode=Mode.ALL):
+def scatter_expl_time_by_size(negations : bool=None, mode : Mode=Mode.ALL_EXPLANATIONS):
 
     all_points = []
 
@@ -268,9 +270,10 @@ def scatter_expl_time_by_size(negations : bool=None, mode : Mode=Mode.ALL):
 
                 print(f"Processing file: {file}")
 
-                df = pd.read_csv(file, sep=';', names=['time', 'explanation'])
+                df = pd.read_csv(file, sep=';', names=['time', 'length', 'explanation'])
+                df = df.sort_values('time')
 
-                if mode == Mode.ALL:
+                if mode == Mode.ALL_EXPLANATIONS:
                     for time in df['time']:
                         rows.append({'size': size, 'time': time})
 
@@ -278,9 +281,9 @@ def scatter_expl_time_by_size(negations : bool=None, mode : Mode=Mode.ALL):
 
                    if not df.empty:
                         time = None
-                        if mode == Mode.FIRST:
+                        if mode == Mode.FIRST_EXPLANATION:
                             time=df.iloc[0]['time']
-                        elif mode == Mode.LAST:
+                        elif mode == Mode.LAST_EXPLANATION:
                             time=df.iloc[-1]['time']
                         rows.append({'size':size, 'time':time})
 
@@ -322,7 +325,12 @@ def scatter_stat_by_size(stat : str='finish time'):
                 df = pd.read_csv(file, sep=';')[stat]
 
                 if not df.empty:
-                    time = df.iloc[-1]
+                    # new, TODO check
+                    final_row = df[df['level'] == 'f']
+                    if not final_row.empty:
+                        time = final_row.iloc[0][stat]
+
+                    #time = df.iloc[-1]
                     rows.append({'size': size, 'time': time})
 
         helper_df = pd.DataFrame(rows)
@@ -358,7 +366,7 @@ def scatter_level_stat(y_axis_stat : str, x_axis_stat : str= 'finish time'):
             print(f"Processing file: {file}")
 
             df = pd.read_csv(file, delimiter=';')[[y_axis_stat,x_axis_stat]]
-            df = df.iloc[:-1]
+            df = df[df['level'] != 'f'] #df = df.iloc[:-1] TODO check
 
             rows.append(df)
 
@@ -394,7 +402,7 @@ def interpolate_level_stats_over_time(y_axis_stat : str, cumulative : bool=False
             print(f"Processing file: {file}")
 
             df = pd.read_csv(file, delimiter=';')
-            df = df.iloc[:-1]
+            df = df[df['level'] != 'f'] #df = df.iloc[:-1]
 
             # Skip invalid or empty files
             if 'finish time' not in df.columns or y_axis_stat not in df.columns or df.empty:

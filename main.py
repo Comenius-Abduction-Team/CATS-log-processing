@@ -2,11 +2,10 @@ import config as cfg
 import process_logs as log
 import plot_logs as plot
 import generic_funcs as generic
-from duplicate_logs import ONTOLOGY
 
 if __name__ == '__main__':
 
-    NEG_MODES = [
+    NEG_MODES_ORE = [
         ('random','random'),
         ('conflicting','conflicting'),
         ('all','')
@@ -491,7 +490,7 @@ plot.set_export_image_extensions({'png', 'pdf'})
     #two_rows_rect = (0, 0, 1, 0.70)
 
     # TODO: overall figs for neg modes with inputs group into S1-S5 and all
-    for mode,regex in NEG_MODES:
+    for mode,regex in NEG_MODES_ORE:
         plot.set_data_path(f"ont_{ONT_INDEX}/S_groups_overall/{RESULTS_FOLDER}/explanations_over_time/{mode}")
         plot.set_export_path(f"ont_{ONT_INDEX}/S_groups_overall/{FIG_DIR}/explanations_over_time/{mode}")
         plot.set_plot_labels(x='Time (sec)', y='Sum of explanations found',
@@ -513,7 +512,7 @@ plot.set_export_image_extensions({'png', 'pdf'})
     plot.set_export_image_settings(5, 9)
 
     # TODO: different abd sizes in one fig
-    for mode, regex in NEG_MODES:
+    for mode, regex in NEG_MODES_ORE:
         plot.set_data_path(f"ont_{ONT_INDEX}/abd_sizes/{RESULTS_FOLDER}/explanations_over_time/{mode}")
         plot.set_export_path(f"ont_{ONT_INDEX}/abd_sizes/{FIG_DIR}/explanations_over_time/{mode}")
         plot.set_plot_labels(x='Time (sec)', y='Sum of explanations found',
@@ -523,7 +522,7 @@ plot.set_export_image_extensions({'png', 'pdf'})
                                    order=["50", "100", "200", "all sizes"])
 
     # TODO: different input types (small, medium, big) in one fig
-    for mode, regex in NEG_MODES:
+    for mode, regex in NEG_MODES_ORE:
         plot.set_data_path(f"ont_{ONT_INDEX}/input_types/{RESULTS_FOLDER}/explanations_over_time/{mode}")
         plot.set_export_path(f"ont_{ONT_INDEX}/input_types/{FIG_DIR}/explanations_over_time/{mode}")
         plot.set_plot_labels(x='Time (sec)', y='Sum of explanations found',
@@ -533,7 +532,7 @@ plot.set_export_image_extensions({'png', 'pdf'})
                                    order=["small", "medium", "large", "all inputs"])
 
     # TODO: 1 obrázok s módmi negácií
-    for mode, regex in NEG_MODES:
+    for mode, regex in NEG_MODES_ORE:
         plot.set_data_path(f"ont_{ONT_INDEX}/neg_modes/{RESULTS_FOLDER}/explanations_over_time")
         plot.set_export_path(f"ont_{ONT_INDEX}/neg_modes/{FIG_DIR}/explanations_over_time")
         plot.set_plot_labels(x='Time (sec)', y='Sum of explanations found',
